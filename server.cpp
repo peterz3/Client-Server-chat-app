@@ -63,4 +63,36 @@ int main(int argc, char *argv[]){
         exit(1);
     }
     cout << "established connection with client" << endl;
+    while(1)
+    {
+        //receive a message from the client (listen)
+        cout << "Awaiting client response..." << endl;
+        memset(&buf, 0, sizeof(buf));//clear the buffer
+        if(!strcmp(buf, "exit"))
+        {
+            cout << "Client has quit the session" << endl;
+            break;
+        }
+        cout << "Client: " << buf << endl;
+        cout << ">";
+        string data;
+        getline(cin, data);
+        memset(&buf, 0, sizeof(buf)); //clear the buffer
+        recv(newSide, (char*)buf, sizeof(buf), 0);
+        strcpy(buf, data.c_str());
+        if(data == "exit")
+        {
+            //send to the client that server has closed the connection
+            send(newSide, (char*)&msg, strlen(msg), 0);
+            break;
+        }
+        //send the message to client
+        send(newSide, (char*)&msg, strlen(msg), 0);
+    }
+
+    close(newSide);
+    close(serverSide);
+    cout << "closing connections and ending session";
+
+    return 0;
 }
