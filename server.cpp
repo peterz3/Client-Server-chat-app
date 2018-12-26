@@ -9,6 +9,7 @@
 #include <unistd.h>
 using namespace std;
 
+#define BACKLOG 5
 
 int main(int argc, char *argv[]){
     //only argument needed to pass in fo server side is the port
@@ -38,13 +39,28 @@ int main(int argc, char *argv[]){
 
     //open stream oriented socket with internet address
     // keep track of the server socket descriptor
-    int serverSd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if(serverSd < 0)
+    int serverSide = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if(serverSide < 0)
     {
         cerr << "Error establishing the server socket" << endl;
         exit(0);
     }
     //bind the socket to local address
-    bind(serverSd, res->ai_addr,res->ai_addrlen);
+    bind(serverSide, res->ai_addr,res->ai_addrlen);
     cout << "server side binded " << endl;
+    //listens to server socket
+    listen(serverSide, BACKLOG);
+    
+    //new socket storage that will maintain connected clients
+    sockaddr_storage newSockAddr;
+    socklen_t newSockAddrSize = sizeof(newSockAddr);
+     //accept, create a new socket descriptor to 
+    //handle the new connection with client
+    int newSide = accept(serverSide, (sockaddr *)&newSockAddr, &newSockAddrSize);
+    if(newSide < 0)
+    {
+        cerr << "Error accepting request from client!" << endl;
+        exit(1);
+    }
+    cout << "established connection with client" << endl;
 }
