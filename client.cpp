@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
     //number on which the server is hosted and the ip address
 
     if(argc != 3 ){
-        cerr << "please specify a port number and ip address of server" << endl;
+        cerr << "please specify ip address and port number of server(in that order)" << endl;
         exit(0);
     }
     int status;
@@ -30,17 +30,58 @@ int main(int argc, char *argv[]){
     hints.ai_socktype = SOCK_STREAM; //connection is run until one side disconnects
     hints.ai_flags = AI_PASSIVE;
 
-    if((status = getaddrinfo(NULL, argv[1] , &hints, &res)) != 0){
+    if((status = getaddrinfo(argv[1], argv[2] , &hints, &res)) != 0){
        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
        //print error if address info returns non-zero
     }
 
     //open stream oriented socket with internet address
     // keep track of the server socket descriptor
-    int serverSide = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if(serverSide < 0)
+    int clientSide = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if(clientSide < 0)
     {
         cerr << "Error establishing the server socket" << endl;
         exit(0);
     }
+
+    connect(clientSide, res->ai_addr, res->ai_addrlen);
+    if (status < 0)
+    {
+        cout << "Error connecting to socket!" << endl;
+    }
+
+    cout << "established connection with server" << endl;
+
+    while(1)
+    {
+        string data;
+        cout << "Client: " << buf << endl;
+        cout << ">";
+        //gets server input
+        getline(cin, data);
+        memset(&buf, 0, sizeof(buf)); //clear the buffer
+        strcpy(buf, data.c_str());
+        //checks if server wrote exit
+        if(data == "exit")
+        {
+            //send to the client that server has closed the connection
+            send(clientSide, (char*)&buf, strlen(buf), 0);
+            break;
+        }
+        //send the message to client
+        send(clientSide, (char*)&buf, strlen(buf), 0);
+        memset(&buf, 0, sizeof(buf));
+        recv(clientSide, (char *)&buf, sizeof(buf), 0);
+        if (strcmp(buf, "exit") == 0)
+        {
+            cout << "Server exited" << endl;
+            break;
+        }
+        cout << "Server: " << buf << endl;
+    }
+    //closing client socket
+        close(clientSide);
+
+        cout << "closing connections and ending session" << endl;
+        return 0;
 }

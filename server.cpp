@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
         memset(&buf, 0, sizeof(buf));//clear the buffer
         recv(newSide, (char*)&buf, sizeof(buf), 0);
         //checks if client wrote exit
-        if(!strcmp(buf, "exit"))
+        if(strcmp(buf, "exit") == 0)
         {
             cout << "Client has quit the session" << endl;
             break;
