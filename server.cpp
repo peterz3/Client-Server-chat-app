@@ -12,7 +12,7 @@ using namespace std;
 #define BACKLOG 5
 
 int main(int argc, char *argv[]){
-    //only argument needed to pass in fo server side is the port
+    //only argument needed to pass in to server side is the port
     //number on which the app will be hosted, make sure its over 2000
 
     if(argc != 2 ){
